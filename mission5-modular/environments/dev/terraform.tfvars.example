@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────────────────────
+# terraform.tfvars.example — environments/dev
+#
+# 사용법:
+#   cp terraform.tfvars.example terraform.tfvars
+#   terraform.tfvars 파일을 본인 환경에 맞게 수정 후 사용
+#
+# 주의:
+#   terraform.tfvars 는 .gitignore 대상입니다.
+#   이 example 파일만 저장소에 커밋하세요.
+# ─────────────────────────────────────────────────────────────
+
+# ─── 기본 설정 ───────────────────────────────────────────────
+
+aws_region   = "us-east-2"
+environment  = "dev"
+project_name = "deepdive"
+
+# ─── 네트워크 ────────────────────────────────────────────────
+# dev VPC: 10.0.0.0/16
+# prod VPC는 10.1.0.0/16 으로 분리 (CIDR 충돌 방지)
+
+vpc_cidr = "10.0.0.0/16"
+
+# 사용 AZ: us-east-2a, us-east-2c (us-east-2b 사용 금지)
+az_names = ["us-east-2a", "us-east-2c"]
+
+# 인덱스 순서가 az_names 와 일치해야 합니다
+# [0] = us-east-2a, [1] = us-east-2c
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]
+
+# ─── ElastiCache 설정 ────────────────────────────────────────
+# dev: 비용 최소화 기준
+# prod 설정과 비교: cache.r6g.large / 3 clusters / apply_immediately=false / 7일 스냅샷
+
+cache_node_type          = "cache.t3.micro"
+cache_num_clusters       = 2       # primary 1 + replica 1 (failover 학습용)
+cache_apply_immediately  = true    # dev는 즉시 적용
+cache_snapshot_retention = 1       # 스냅샷 보관 1일
+
+# ─── 메시지 큐 설정 ──────────────────────────────────────────
+# queues 변수는 variables.tf 에 dev 기본값(4일 retention)이 정의되어 있습니다.
+# 큐 설정을 변경하려면 아래 블록 주석을 해제하고 수정하세요.
+#
+# queues = {
+#   order = {
+#     visibility_timeout_seconds = 30
+#     max_receive_count          = 3
+#     message_retention_seconds  = 345600  # 4일
+#   }
+#   notification = {
+#     visibility_timeout_seconds = 60
+#     max_receive_count          = 5
+#     message_retention_seconds  = 345600  # 4일
+#   }
+# }

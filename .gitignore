@@ -1,0 +1,74 @@
+# ═══════════════════════════════════════════════════════
+# Terraform — generated files
+# ═══════════════════════════════════════════════════════
+
+# 다운로드된 프로바이더 바이너리 / 모듈 캐시
+# terraform init 할 때마다 재생성되므로 커밋 불필요 (수백 MB)
+.terraform/
+
+# State 파일 — 실제 리소스 ID, 비밀번호 등 민감 정보 포함 가능
+# 실습에서는 S3 backend를 사용하므로 로컬 tfstate는 잔재 파일임
+*.tfstate
+*.tfstate.backup
+
+# Plan 바이너리 — terraform plan -out=tfplan 으로 생성되는 파일
+# 민감 값(auth_token 등)이 암호화되지 않은 형태로 포함될 수 있음
+tfplan
+*.tfplan
+
+# Variables 파일 — 환경별 실제 값이 들어가며, 나중에 비밀번호 등 추가 가능
+# 대신 *.tfvars.example 파일로 안전하게 공유 가능
+*.tfvars
+*.tfvars.json
+
+# Terraform 충돌 시 생성되는 크래시 로그 (state 정보 포함 가능)
+crash.log
+crash.*.log
+
+# 로컬 오버라이드 파일 — 개인 환경 임시 수정용
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ─── .terraform.lock.hcl 은 커밋 대상 ──────────────────
+# 프로바이더 버전을 고정해 팀 전체에서 동일한 버전으로 init 되도록 보장
+# → gitignore에 포함하지 않음 (의도적으로 제외)
+
+# ═══════════════════════════════════════════════════════
+# 개인 / 로컬 환경
+# ═══════════════════════════════════════════════════════
+
+# Claude Code 메모리 디렉토리
+# AWS 계정 ID, MFA ARN, IAM 사용자명 등 개인 환경 정보 포함 — 공개 부적합
+memory/
+
+# Codex 개인 설정 파일
+.codex
+
+# 강사 제공 MFA 스크립트 (본인 코드 아님, 별도 저장소)
+aws-mfa-main-guide1/
+
+# ═══════════════════════════════════════════════════════
+# OS / 에디터
+# ═══════════════════════════════════════════════════════
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Vim / Emacs
+*.swp
+*.swo
+*~
+
+# JetBrains IDE
+.idea/
+
+# VSCode (로컬 설정만 — 공유 설정은 .vscode/extensions.json 등 제외)
+.vscode/

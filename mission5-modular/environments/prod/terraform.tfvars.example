@@ -1,0 +1,62 @@
+# ─────────────────────────────────────────────────────────────
+# terraform.tfvars.example — environments/prod
+#
+# 사용법:
+#   cp terraform.tfvars.example terraform.tfvars
+#   terraform.tfvars 파일을 본인 환경에 맞게 수정 후 사용
+#
+# 주의:
+#   terraform.tfvars 는 .gitignore 대상입니다.
+#   이 example 파일만 저장소에 커밋하세요.
+#
+# prod apply 시 비용 주의:
+#   cache.r6g.large + NAT Gateway 2개는 시간당 비용이 큽니다.
+#   비용이 부담된다면 cache_node_type 을 "cache.t3.micro" 로 낮춰 테스트하세요.
+# ─────────────────────────────────────────────────────────────
+
+# ─── 기본 설정 ───────────────────────────────────────────────
+
+aws_region   = "us-east-2"
+environment  = "prod"
+project_name = "deepdive"
+
+# ─── 네트워크 ────────────────────────────────────────────────
+# prod VPC: 10.1.0.0/16 (dev 10.0.0.0/16 과 CIDR 분리)
+# prod는 single_nat_gateway = false 고정 (environments/prod/main.tf)
+# → AZ당 NAT Gateway 1개, EIP 2개, Private Route Table 2개 생성
+
+vpc_cidr = "10.1.0.0/16"
+
+# 사용 AZ: us-east-2a, us-east-2c (us-east-2b 사용 금지)
+az_names = ["us-east-2a", "us-east-2c"]
+
+# 인덱스 순서가 az_names 와 일치해야 합니다
+# [0] = us-east-2a, [1] = us-east-2c
+public_subnet_cidrs  = ["10.1.1.0/24", "10.1.2.0/24"]
+private_subnet_cidrs = ["10.1.11.0/24", "10.1.12.0/24"]
+
+# ─── ElastiCache 설정 ────────────────────────────────────────
+# prod: 고가용성 기준
+# dev 설정과 비교: cache.t3.micro / 2 clusters / apply_immediately=true / 1일 스냅샷
+
+cache_node_type          = "cache.r6g.large"  # 비용 절감 시 cache.t3.micro 로 변경 가능
+cache_num_clusters       = 3                   # primary 1 + replica 2
+cache_apply_immediately  = false               # prod는 maintenance window 대기
+cache_snapshot_retention = 7                   # 스냅샷 보관 7일
+
+# ─── 메시지 큐 설정 ──────────────────────────────────────────
+# queues 변수는 variables.tf 에 prod 기본값(7일 retention)이 정의되어 있습니다.
+# 큐 설정을 변경하려면 아래 블록 주석을 해제하고 수정하세요.
+#
+# queues = {
+#   order = {
+#     visibility_timeout_seconds = 30
+#     max_receive_count          = 3
+#     message_retention_seconds  = 604800  # 7일
+#   }
+#   notification = {
+#     visibility_timeout_seconds = 60
+#     max_receive_count          = 5
+#     message_retention_seconds  = 604800  # 7일
+#   }
+# }
